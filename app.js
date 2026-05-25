@@ -61,6 +61,7 @@
     activeAdminTab: "reports",
     activeAppointmentTab: "pending",
     editingAppointmentSnapshot: null,
+    selectedDetailsAppointmentId: null,
   };
 
   const els = {};
@@ -71,7 +72,9 @@
     bindElements();
     initLogoFallbacks();
     loadDatabase();
-    seedReportDates();
+    if (els.reportPeriod) {
+      seedReportDates();
+    }
     bindEvents();
     renderAll();
   }
@@ -107,6 +110,7 @@
       "sendWhatsappBtn",
       "closeSuccessBtn",
       "openLoginBtn",
+      "adminLoginView",
       "loginModal",
       "loginForm",
       "closeLoginBtn",
@@ -141,6 +145,14 @@
       "cancelProfessionalEdit",
       "professionalsList",
       "appointmentModal",
+      "appointmentDetailsModal",
+      "appointmentDetailsContent",
+      "detailsTitle",
+      "closeDetailsModal",
+      "detailsEditBtn",
+      "detailsFinalizeBtn",
+      "detailsCancelStatusBtn",
+      "detailsDeleteBtn",
       "appointmentForm",
       "appointmentId",
       "appointmentDate",
@@ -162,77 +174,83 @@
   }
 
   function bindEvents() {
-    els.prevMonthBtn.addEventListener("click", () => changeMonth(-1));
-    els.nextMonthBtn.addEventListener("click", () => changeMonth(1));
+    on(els.prevMonthBtn, "click", () => changeMonth(-1));
+    on(els.nextMonthBtn, "click", () => changeMonth(1));
 
-    els.calendarGrid.addEventListener("click", (event) => {
+    on(els.calendarGrid, "click", (event) => {
       const dayButton = event.target.closest("[data-date]");
       if (!dayButton || dayButton.disabled) return;
       openScheduleModal(dayButton.dataset.date);
     });
 
-    els.professionalSelect.addEventListener("change", () => {
+    on(els.professionalSelect, "change", () => {
       state.pendingSlot = null;
       renderTimeSlots();
     });
 
-    els.serviceSelect.addEventListener("change", () => {
+    on(els.serviceSelect, "change", () => {
       state.pendingSlot = null;
       renderTimeSlots();
     });
 
-    els.timeSlots.addEventListener("click", (event) => {
+    on(els.timeSlots, "click", (event) => {
       const slotButton = event.target.closest("[data-time]");
       if (!slotButton || slotButton.disabled) return;
       state.pendingSlot = slotButton.dataset.time;
       renderTimeSlots();
     });
 
-    els.confirmSlotBtn.addEventListener("click", confirmPendingSlot);
-    els.cancelScheduleBtn.addEventListener("click", () => closeDialog(els.scheduleModal));
-    els.clientForm.addEventListener("submit", createClientAppointment);
+    on(els.confirmSlotBtn, "click", confirmPendingSlot);
+    on(els.cancelScheduleBtn, "click", () => closeDialog(els.scheduleModal));
+    on(els.clientForm, "submit", createClientAppointment);
 
-    els.closeSuccessBtn.addEventListener("click", () => closeDialog(els.successModal));
-    els.sendWhatsappBtn.addEventListener("click", sendLastAppointmentToWhatsapp);
+    on(els.closeSuccessBtn, "click", () => closeDialog(els.successModal));
+    on(els.sendWhatsappBtn, "click", sendLastAppointmentToWhatsapp);
 
-    els.openLoginBtn.addEventListener("click", () => openDialog(els.loginModal));
-    els.closeLoginBtn.addEventListener("click", () => closeDialog(els.loginModal));
-    els.loginForm.addEventListener("submit", handleLogin);
-    els.logoutBtn.addEventListener("click", handleLogout);
+    on(els.openLoginBtn, "click", () => openDialog(els.loginModal));
+    on(els.closeLoginBtn, "click", () => closeDialog(els.loginModal));
+    on(els.loginForm, "submit", handleLogin);
+    on(els.logoutBtn, "click", handleLogout);
 
     document.querySelectorAll("[data-admin-tab]").forEach((button) => {
-      button.addEventListener("click", () => {
+      on(button, "click", () => {
         state.activeAdminTab = button.dataset.adminTab;
         renderAdminTabs();
       });
     });
 
     document.querySelectorAll("[data-appointment-tab]").forEach((button) => {
-      button.addEventListener("click", () => {
+      on(button, "click", () => {
         state.activeAppointmentTab = button.dataset.appointmentTab;
         renderAppointmentTabs();
         renderAppointmentsList();
       });
     });
 
-    els.reportPeriod.addEventListener("change", applyReportPeriod);
-    els.reportStart.addEventListener("change", renderReports);
-    els.reportEnd.addEventListener("change", renderReports);
-    els.refreshAdminBtn.addEventListener("click", renderAdmin);
+    on(els.reportPeriod, "change", applyReportPeriod);
+    on(els.reportStart, "change", renderReports);
+    on(els.reportEnd, "change", renderReports);
+    on(els.refreshAdminBtn, "click", renderAdmin);
 
-    els.appointmentsList.addEventListener("click", handleAppointmentAction);
-    els.serviceForm.addEventListener("submit", saveService);
-    els.cancelServiceEdit.addEventListener("click", resetServiceForm);
-    els.servicesList.addEventListener("click", handleServiceAction);
-    els.professionalForm.addEventListener("submit", saveProfessional);
-    els.cancelProfessionalEdit.addEventListener("click", resetProfessionalForm);
-    els.professionalsList.addEventListener("click", handleProfessionalAction);
+    on(els.appointmentsList, "click", handleAppointmentAction);
+    on(els.serviceForm, "submit", saveService);
+    on(els.cancelServiceEdit, "click", resetServiceForm);
+    on(els.servicesList, "click", handleServiceAction);
+    on(els.professionalForm, "submit", saveProfessional);
+    on(els.cancelProfessionalEdit, "click", resetProfessionalForm);
+    on(els.professionalsList, "click", handleProfessionalAction);
 
-    els.appointmentForm.addEventListener("submit", saveAppointmentEdit);
-    els.closeAppointmentModal.addEventListener("click", closeAppointmentEditor);
-    els.cancelAppointmentEdit.addEventListener("click", closeAppointmentEditor);
+    on(els.appointmentForm, "submit", saveAppointmentEdit);
+    on(els.closeAppointmentModal, "click", closeAppointmentEditor);
+    on(els.cancelAppointmentEdit, "click", closeAppointmentEditor);
+    on(els.closeDetailsModal, "click", closeAppointmentDetails);
+    on(els.detailsEditBtn, "click", editSelectedAppointmentFromDetails);
+    on(els.detailsFinalizeBtn, "click", finalizeSelectedAppointmentFromDetails);
+    on(els.detailsCancelStatusBtn, "click", cancelSelectedAppointmentFromDetails);
+    on(els.detailsDeleteBtn, "click", deleteSelectedAppointmentFromDetails);
+
     ["appointmentDate", "appointmentService", "appointmentProfessional"].forEach((id) => {
-      els[id].addEventListener("change", () => renderAppointmentTimeOptions());
+      on(els[id], "change", () => renderAppointmentTimeOptions());
     });
 
     window.addEventListener("storage", (event) => {
@@ -241,6 +259,12 @@
         renderAll();
       }
     });
+  }
+
+  function on(element, eventName, handler) {
+    if (element) {
+      element.addEventListener(eventName, handler);
+    }
   }
 
   function initLogoFallbacks() {
@@ -287,12 +311,17 @@
   }
 
   function renderAll() {
-    renderCalendar();
-    renderSelectionSummary();
-    renderAdmin();
+    if (els.calendarGrid) {
+      renderCalendar();
+      renderSelectionSummary();
+    }
+    if (els.adminPanel) {
+      renderAdmin();
+    }
   }
 
   function renderCalendar() {
+    if (!els.calendarGrid || !els.monthLabel) return;
     const year = state.monthDate.getFullYear();
     const month = state.monthDate.getMonth();
     const firstDay = new Date(year, month, 1);
@@ -486,6 +515,7 @@
   }
 
   function renderSelectionSummary() {
+    if (!els.selectionEmpty || !els.selectionSummary) return;
     const selection = hydrateSelection(state.selectedReservation);
 
     if (!selection) {
@@ -631,9 +661,13 @@
 
     if (user === CONFIG.adminUser && password === CONFIG.adminPassword) {
       els.loginError.textContent = "";
-      closeDialog(els.loginModal);
+      if (els.loginModal) {
+        closeDialog(els.loginModal);
+      }
       els.loginForm.reset();
+      els.adminLoginView?.classList.add("hidden");
       els.adminPanel.classList.remove("hidden");
+      els.logoutBtn?.classList.remove("hidden");
       renderAdmin();
       els.adminPanel.scrollIntoView({ behavior: "smooth", block: "start" });
       showToast("Painel administrativo aberto.");
@@ -645,10 +679,13 @@
 
   function handleLogout() {
     els.adminPanel.classList.add("hidden");
+    els.adminLoginView?.classList.remove("hidden");
+    els.logoutBtn?.classList.add("hidden");
     showToast("Painel administrativo fechado.");
   }
 
   function renderAdmin() {
+    if (!els.adminPanel) return;
     renderAdminTabs();
     renderReports();
     renderAppointmentsList();
@@ -814,6 +851,7 @@
   }
 
   function renderAppointmentsList() {
+    if (!els.appointmentsList) return;
     const status = state.activeAppointmentTab === "finalized" ? "finalized" : "pending";
     const rows = state.appointments.filter((appointment) => appointment.status === status);
 
@@ -833,45 +871,28 @@
   }
 
   function appointmentCardTemplate(appointment) {
-    const finalized = appointment.status === "finalized";
     return `
-      <article class="appointment-card ${appointment.status}">
-        <div class="card-top">
+      <button class="appointment-mini-card ${appointment.status}" type="button" data-action="details-appointment" data-id="${appointment.id}">
+        <span class="status-pill ${appointment.status}">${statusLabel(appointment.status)}</span>
+        <div class="mini-card-line">
+          <span>NOME</span>
+          <strong>${escapeHtml(appointment.customerName)}</strong>
+        </div>
+        <div class="mini-card-grid">
           <div>
-            <h4>${escapeHtml(appointment.customerName)}</h4>
-            <p class="micro-label">${formatDateShort(appointment.date)} - ${
-              appointment.start
-            } as ${appointment.end}</p>
+            <span>HORARIO</span>
+            <strong>${appointment.start}</strong>
           </div>
-          <span class="status-pill ${appointment.status}">${statusLabel(
-            appointment.status
-          )}</span>
+          <div>
+            <span>SERVICO</span>
+            <strong>${escapeHtml(appointment.serviceName)}</strong>
+          </div>
+          <div>
+            <span>PRECO</span>
+            <strong>${formatMoney(appointment.servicePrice)}</strong>
+          </div>
         </div>
-        <div class="details-grid">
-          ${detailItem("Telefone", appointment.customerPhone)}
-          ${detailItem("Servico", appointment.serviceName)}
-          ${detailItem("Valor", formatMoney(appointment.servicePrice))}
-          ${detailItem("Duracao", `${appointment.serviceDuration} min`)}
-          ${detailItem("Dia", formatDateShort(appointment.date))}
-          ${detailItem("Horario", `${appointment.start} as ${appointment.end}`)}
-          ${detailItem("Profissional", appointment.professionalName)}
-          ${detailItem("Observacoes", appointment.notes || "Sem observacoes")}
-        </div>
-        <div class="card-actions">
-          ${
-            finalized
-              ? `<button class="mini-button" type="button" data-action="view-appointment" data-id="${appointment.id}">Ver detalhes</button>`
-              : `
-                <button class="mini-button" type="button" data-action="edit-appointment" data-id="${appointment.id}">Editar</button>
-                <button class="success-button" type="button" data-action="finalize-appointment" data-id="${appointment.id}">Marcar como finalizado</button>
-                <button class="danger-button" type="button" data-action="cancel-appointment" data-id="${appointment.id}">Cancelar</button>
-              `
-          }
-          <button class="danger-button" type="button" data-action="delete-appointment" data-id="${
-            appointment.id
-          }">Excluir</button>
-        </div>
-      </article>
+      </button>
     `;
   }
 
@@ -883,6 +904,10 @@
     if (!appointment) return;
 
     const action = button.dataset.action;
+
+    if (action === "details-appointment") {
+      openAppointmentDetails(appointment);
+    }
 
     if (action === "edit-appointment" || action === "view-appointment") {
       openAppointmentEditor(appointment, action === "view-appointment");
@@ -904,6 +929,83 @@
       renderAll();
       showToast("Agendamento excluido.");
     }
+  }
+
+  function openAppointmentDetails(appointment) {
+    if (!els.appointmentDetailsModal || !els.appointmentDetailsContent) return;
+
+    state.selectedDetailsAppointmentId = appointment.id;
+    els.detailsTitle.textContent = `${appointment.start} - ${appointment.customerName}`;
+    els.appointmentDetailsContent.innerHTML = `
+      <div class="details-hero">
+        <span class="status-pill ${appointment.status}">${statusLabel(appointment.status)}</span>
+        <h3>${escapeHtml(appointment.customerName)}</h3>
+        <p>${formatDateLong(appointment.date)} - ${appointment.start} as ${appointment.end}</p>
+      </div>
+      <div class="details-grid detail-modal-grid">
+        ${detailItem("Telefone", appointment.customerPhone)}
+        ${detailItem("Servico", appointment.serviceName)}
+        ${detailItem("Valor", formatMoney(appointment.servicePrice))}
+        ${detailItem("Duracao", `${appointment.serviceDuration} min`)}
+        ${detailItem("Dia", formatDateShort(appointment.date))}
+        ${detailItem("Horario", `${appointment.start} as ${appointment.end}`)}
+        ${detailItem("Profissional", appointment.professionalName)}
+        ${detailItem("WhatsApp profissional", appointment.professionalWhatsapp)}
+        ${detailItem("Observacoes", appointment.notes || "Sem observacoes")}
+        ${detailItem("Criado em", formatDateTime(appointment.createdAt))}
+      </div>
+    `;
+
+    const isFinalized = appointment.status === "finalized";
+    els.detailsFinalizeBtn?.classList.toggle("hidden", isFinalized);
+    els.detailsCancelStatusBtn?.classList.toggle("hidden", isFinalized);
+    openDialog(els.appointmentDetailsModal);
+  }
+
+  function closeAppointmentDetails() {
+    state.selectedDetailsAppointmentId = null;
+    closeDialog(els.appointmentDetailsModal);
+  }
+
+  function getSelectedDetailsAppointment() {
+    return state.selectedDetailsAppointmentId
+      ? getAppointmentById(state.selectedDetailsAppointmentId)
+      : null;
+  }
+
+  function editSelectedAppointmentFromDetails() {
+    const appointment = getSelectedDetailsAppointment();
+    if (!appointment) return;
+    closeAppointmentDetails();
+    openAppointmentEditor(appointment, false);
+  }
+
+  function finalizeSelectedAppointmentFromDetails() {
+    const appointment = getSelectedDetailsAppointment();
+    if (!appointment) return;
+    closeAppointmentDetails();
+    updateAppointmentStatus(appointment.id, "finalized");
+  }
+
+  function cancelSelectedAppointmentFromDetails() {
+    const appointment = getSelectedDetailsAppointment();
+    if (!appointment) return;
+    closeAppointmentDetails();
+    updateAppointmentStatus(appointment.id, "canceled");
+  }
+
+  function deleteSelectedAppointmentFromDetails() {
+    const appointment = getSelectedDetailsAppointment();
+    if (!appointment) return;
+
+    const ok = window.confirm("Excluir este agendamento definitivamente?");
+    if (!ok) return;
+
+    closeAppointmentDetails();
+    state.appointments = state.appointments.filter((item) => item.id !== appointment.id);
+    saveCollection(STORAGE.appointments, state.appointments);
+    renderAll();
+    showToast("Agendamento excluido.");
   }
 
   function updateAppointmentStatus(id, status) {
@@ -1473,6 +1575,14 @@
 
   function formatDateShort(dateKey) {
     return new Intl.DateTimeFormat("pt-BR").format(dateFromKey(dateKey));
+  }
+
+  function formatDateTime(value) {
+    if (!value) return "Nao informado";
+    return new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    }).format(new Date(value));
   }
 
   function minutesToTime(minutes) {

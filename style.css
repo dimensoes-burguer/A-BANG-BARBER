@@ -97,6 +97,10 @@ img {
   padding: 18px 0 56px;
 }
 
+.admin-shell {
+  width: min(1320px, calc(100% - 32px));
+}
+
 .topbar {
   position: sticky;
   top: 0;
@@ -1257,6 +1261,24 @@ textarea:focus {
   margin: 0 auto;
 }
 
+.admin-login-view {
+  display: grid;
+  min-height: calc(100vh - 150px);
+  place-items: center;
+  padding: 28px 0;
+}
+
+.admin-login-card {
+  width: min(100%, 460px);
+}
+
+.admin-login-card h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.05;
+}
+
 .form-error {
   min-height: 18px;
   margin: 0;
@@ -1352,6 +1374,122 @@ textarea:focus {
 .toast.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+.compact-appointments {
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  align-items: stretch;
+}
+
+.appointment-mini-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  min-height: 210px;
+  aspect-ratio: 1 / 0.95;
+  padding: 16px;
+  color: var(--white);
+  text-align: left;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02)),
+    var(--panel);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.26);
+}
+
+.appointment-mini-card:hover {
+  border-color: var(--line);
+  box-shadow:
+    0 20px 42px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(216, 170, 61, 0.14);
+  transform: translateY(-2px);
+}
+
+.appointment-mini-card.finalized {
+  border-color: rgba(39, 179, 106, 0.34);
+}
+
+.mini-card-line,
+.mini-card-grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.mini-card-line span,
+.mini-card-grid span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.mini-card-line strong {
+  overflow: hidden;
+  color: var(--white);
+  font-size: 1.28rem;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-card-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.mini-card-grid strong {
+  display: block;
+  overflow: hidden;
+  color: var(--gold-light);
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.details-modal-card {
+  min-height: min(620px, calc(100vh - 42px));
+}
+
+.appointment-details-view {
+  display: grid;
+  gap: 16px;
+}
+
+.details-hero {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(216, 170, 61, 0.12), transparent 65%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.details-hero h3 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 1.05;
+}
+
+.details-hero p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.detail-modal-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detail-modal-grid .detail-item:nth-last-child(1) {
+  grid-column: 1 / -1;
+}
+
+.details-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 1180px) {

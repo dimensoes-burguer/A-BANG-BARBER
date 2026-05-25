@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A BANG' BARBER | Painel do Dono</title>
+    <meta name="description" content="Painel administrativo da A BANG' BARBER." />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-page="admin">
+    <div class="app-shell admin-shell">
+      <header class="topbar">
+        <a class="brand" href="index.html" aria-label="A BANG' BARBER">
+          <span class="logo-frame">
+            <img
+              class="logo-img"
+              src="logo.png"
+              alt="Logo A BANG' BARBER"
+              data-logo-img
+            />
+            <span class="logo-fallback" data-logo-fallback>
+              <strong>AB</strong>
+              <small>BANG' BARBER</small>
+            </span>
+          </span>
+          <span class="brand-copy">
+            <span class="brand-kicker">Painel administrativo</span>
+            <span class="brand-name">A BANG' BARBER</span>
+            <span class="brand-address">Gestao de agenda, equipe e relatorios</span>
+          </span>
+        </a>
+
+        <nav class="top-actions" aria-label="Atalhos administrativos">
+          <a class="ghost-link" href="index.html">Area do cliente</a>
+          <button class="ghost-button hidden" type="button" id="logoutBtn">Sair</button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="admin-login-view" id="adminLoginView" aria-label="Login administrativo">
+          <form class="modal-card login-card admin-login-card" id="loginForm">
+            <span class="logo-frame centered">
+              <img
+                class="logo-img"
+                src="logo.png"
+                alt="Logo A BANG' BARBER"
+                data-logo-img
+              />
+              <span class="logo-fallback" data-logo-fallback>
+                <strong>AB</strong>
+                <small>BANG'</small>
+              </span>
+            </span>
+            <div class="modal-heading centered-text">
+              <p class="eyebrow">Login administrativo</p>
+              <h1>Acesso do dono</h1>
+            </div>
+            <label>
+              Usuario
+              <input type="text" id="adminUser" autocomplete="username" required />
+            </label>
+            <label>
+              Senha
+              <input
+                type="password"
+                id="adminPassword"
+                autocomplete="current-password"
+                required
+              />
+            </label>
+            <p class="form-error" id="loginError" aria-live="polite"></p>
+            <button class="primary-button" type="submit">Entrar no painel</button>
+          </form>
+        </section>
+
+        <section class="admin-panel hidden" id="adminPanel" aria-label="Painel administrativo">
+          <div class="admin-hero">
+            <div class="admin-brand">
+              <span class="logo-frame small">
+                <img
+                  class="logo-img"
+                  src="logo.png"
+                  alt="Logo A BANG' BARBER"
+                  data-logo-img
+                />
+                <span class="logo-fallback" data-logo-fallback>
+                  <strong>AB</strong>
+                  <small>BANG'</small>
+                </span>
+              </span>
+              <div>
+                <p class="eyebrow">Painel do dono</p>
+                <h2>A BANG' BARBER</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-tabs" role="tablist" aria-label="Abas administrativas">
+            <button class="tab-button active" type="button" data-admin-tab="reports">
+              RELATORIOS
+            </button>
+            <button class="tab-button" type="button" data-admin-tab="appointments">
+              AGENDAMENTOS
+            </button>
+            <button class="tab-button" type="button" data-admin-tab="services">
+              SERVICOS / CORTES
+            </button>
+            <button class="tab-button" type="button" data-admin-tab="professionals">
+              PROFISSIONAIS
+            </button>
+          </div>
+
+          <div class="admin-content">
+            <section class="admin-section active" id="admin-reports">
+              <div class="admin-section-heading">
+                <div>
+                  <p class="eyebrow">Relatorios</p>
+                  <h3>Visao geral da loja</h3>
+                </div>
+                <div class="filters">
+                  <label>
+                    Inicio
+                    <input type="date" id="reportStart" />
+                  </label>
+                  <label>
+                    Fim
+                    <input type="date" id="reportEnd" />
+                  </label>
+                  <select id="reportPeriod" aria-label="Periodo do relatorio">
+                    <option value="today">Hoje</option>
+                    <option value="week">Esta semana</option>
+                    <option value="month" selected>Este mes</option>
+                    <option value="all">Tudo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="metrics-grid" id="metricsGrid"></div>
+
+              <div class="report-columns">
+                <article class="admin-card">
+                  <h4>Servicos mais agendados</h4>
+                  <div id="topServices" class="rank-list"></div>
+                </article>
+                <article class="admin-card">
+                  <h4>Profissionais com mais agendamentos</h4>
+                  <div id="topProfessionals" class="rank-list"></div>
+                </article>
+                <article class="admin-card">
+                  <h4>Proximos horarios de hoje</h4>
+                  <div id="todayQueue" class="compact-list"></div>
+                </article>
+              </div>
+            </section>
+
+            <section class="admin-section" id="admin-appointments">
+              <div class="admin-section-heading">
+                <div>
+                  <p class="eyebrow">Agenda</p>
+                  <h3>Agendamentos por horario</h3>
+                </div>
+                <button class="outline-button" type="button" id="refreshAdminBtn">
+                  Atualizar
+                </button>
+              </div>
+
+              <div class="subtabs" role="tablist" aria-label="Status dos agendamentos">
+                <button
+                  class="subtab-button active"
+                  type="button"
+                  data-appointment-tab="pending"
+                >
+                  Pendentes
+                </button>
+                <button
+                  class="subtab-button"
+                  type="button"
+                  data-appointment-tab="finalized"
+                >
+                  Finalizados
+                </button>
+              </div>
+
+              <div class="appointments-list compact-appointments" id="appointmentsList"></div>
+            </section>
+
+            <section class="admin-section" id="admin-services">
+              <div class="admin-section-heading">
+                <div>
+                  <p class="eyebrow">Catalogo</p>
+                  <h3>Servicos / Cortes</h3>
+                </div>
+              </div>
+
+              <form class="manager-form" id="serviceForm">
+                <input type="hidden" id="serviceId" />
+                <label>
+                  Nome do servico
+                  <input type="text" id="serviceName" placeholder="Corte + Barba" required />
+                </label>
+                <label>
+                  Tempo em minutos
+                  <input
+                    type="number"
+                    id="serviceDuration"
+                    min="15"
+                    step="15"
+                    placeholder="60"
+                    required
+                  />
+                </label>
+                <label>
+                  Valor
+                  <input
+                    type="number"
+                    id="servicePrice"
+                    min="0"
+                    step="0.01"
+                    placeholder="35.00"
+                    required
+                  />
+                </label>
+                <button class="primary-button" type="submit" id="serviceSubmit">
+                  Salvar servico
+                </button>
+                <button class="ghost-button hidden" type="button" id="cancelServiceEdit">
+                  Cancelar edicao
+                </button>
+              </form>
+
+              <div class="management-list" id="servicesList"></div>
+            </section>
+
+            <section class="admin-section" id="admin-professionals">
+              <div class="admin-section-heading">
+                <div>
+                  <p class="eyebrow">Equipe</p>
+                  <h3>Profissionais / Cabeleireiros</h3>
+                </div>
+              </div>
+
+              <form class="manager-form" id="professionalForm">
+                <input type="hidden" id="professionalId" />
+                <label>
+                  Nome
+                  <input
+                    type="text"
+                    id="professionalName"
+                    placeholder="Nome do profissional"
+                    required
+                  />
+                </label>
+                <label>
+                  WhatsApp individual
+                  <input
+                    type="tel"
+                    id="professionalWhatsapp"
+                    placeholder="62999999999"
+                    required
+                  />
+                </label>
+                <label>
+                  Status
+                  <select id="professionalStatus">
+                    <option value="available">Disponivel</option>
+                    <option value="unavailable">Indisponivel</option>
+                  </select>
+                </label>
+                <button class="primary-button" type="submit" id="professionalSubmit">
+                  Salvar profissional
+                </button>
+                <button class="ghost-button hidden" type="button" id="cancelProfessionalEdit">
+                  Cancelar edicao
+                </button>
+              </form>
+
+              <div class="management-list" id="professionalsList"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="modal" id="appointmentDetailsModal">
+      <div class="modal-card large-modal details-modal-card">
+        <button class="modal-close" type="button" id="closeDetailsModal" aria-label="Fechar">
+          ×
+        </button>
+        <div class="modal-heading">
+          <p class="eyebrow">Detalhes do agendamento</p>
+          <h2 id="detailsTitle">Agendamento</h2>
+        </div>
+        <div class="appointment-details-view" id="appointmentDetailsContent"></div>
+        <div class="modal-actions details-actions">
+          <button class="mini-button" type="button" id="detailsEditBtn">Editar</button>
+          <button class="success-button" type="button" id="detailsFinalizeBtn">
+            Marcar como finalizado
+          </button>
+          <button class="danger-button" type="button" id="detailsCancelStatusBtn">
+            Cancelar agendamento
+          </button>
+          <button class="danger-button" type="button" id="detailsDeleteBtn">Excluir</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="modal" id="appointmentModal">
+      <form class="modal-card large-modal" id="appointmentForm">
+        <button class="modal-close" type="button" id="closeAppointmentModal" aria-label="Fechar">
+          ×
+        </button>
+        <div class="modal-heading">
+          <p class="eyebrow">Editar agenda</p>
+          <h2>Alterar agendamento</h2>
+        </div>
+        <input type="hidden" id="appointmentId" />
+        <div class="edit-grid">
+          <label>
+            Dia
+            <input type="date" id="appointmentDate" required />
+          </label>
+          <label>
+            Horario
+            <select id="appointmentTime" required></select>
+          </label>
+          <label>
+            Servico
+            <select id="appointmentService" required></select>
+          </label>
+          <label>
+            Profissional
+            <select id="appointmentProfessional" required></select>
+          </label>
+          <label>
+            Nome do cliente
+            <input type="text" id="appointmentClientName" required />
+          </label>
+          <label>
+            Telefone
+            <input type="tel" id="appointmentClientPhone" required />
+          </label>
+        </div>
+        <label>
+          Observacoes
+          <textarea id="appointmentNotes" rows="4"></textarea>
+        </label>
+        <p class="form-error" id="appointmentError" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button class="ghost-button" type="button" id="cancelAppointmentEdit">
+            Cancelar
+          </button>
+          <button class="primary-button" type="submit">Salvar alteracoes</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
